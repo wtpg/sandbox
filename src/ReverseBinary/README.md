@@ -1,5 +1,6 @@
 # Reversed Binary Numbers
 (Difficulty Level: Easy)
+
 ProblemID: Reversebinary
 
 ## Task
@@ -11,11 +12,11 @@ The input contains a single line with an integer N, 1 ≤ N ≤ 1000000000.
 ## Output
 Output one line with one integer, the number we get by reversing the binary representation of N.
 
-**Sample input 1**
+####Sample input 1
 13
-**Sample output 1**
+####Sample output 1
 11
-**Sample input 2**
+####Sample input 2
 47
-**Sample output 2**
+####Sample output 2
 61

@@ -4,6 +4,7 @@ import java.util.Arrays;
  * Reversing the binary representation of a given number. The reverse and convert to binary implementation is done with no use of standard java libs
  */
 public class ReverseBinary {
+    public static final int UPPER_LIMIT = 1000000000;
     /**
      * Converts an integer number into a char array of bits
      * This implementation is a bit different, comparing to {@link java.lang.Integer#toString(int, int)} as it converts only to the binary representation
@@ -28,8 +29,14 @@ public class ReverseBinary {
 
     /**
      * Takes a given number, transforms it to a binary format, reverses a sequence of bites and returns this as a result.
+     *
+     * @throws java.lang.IllegalArgumentException if <code>number</code> <= 0 or > 1000000000
      */
-    public static int reverse(int number) {
+    public static int reverse(int number) throws IllegalArgumentException {
+        if (number <= 0 || number > UPPER_LIMIT) {
+            throw new IllegalArgumentException("Input number shall be 1 <= N <= " + 1000000000 + ", but provided: " + number);
+        }
+
         // init an array of binaries
         char[] binary = toBinary(number);
 
