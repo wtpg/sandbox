@@ -1,7 +1,4 @@
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Zipf’s Song puzzle implementation.
@@ -11,29 +8,37 @@ import java.util.List;
  */
 public class ZipfSong implements Comparable<ZipfSong> {
     private String name;
-    private float popularity;
+    private double popularity;
+    private int index;
+    private static SortingStrategy sorter = new StandardSort(); // TODO: read it as a param
 
     /**
-     * Package level access, please use {@link ZipfSong#convert(int[], String[])} instead to assign correct popularity value, based on the song's position in the list
+     * Package level access, please use {@link ZipfSong#convert(long, String, int)} instead to assign correct popularity value, based on the song's position in the list
      */
-    private ZipfSong(@NotNull String name, float popularity) {
+    private ZipfSong(String name, double popularity, int index) {
         this.name = name;
         this.popularity = popularity;
+        this.index = index;
     }
 
     /**
      * Helper method to convert the input into a list of objects. Defines the song's popularity based on the position in the list and the amount of played times.
      */
-    public static List<ZipfSong> convert(@NotNull int[] frequencies, @NotNull String[] names) {
+    public static List<ZipfSong> convert(long[] frequencies, String[] names) {
         assert(frequencies != null && names != null);
         assert(frequencies.length == names.length);
 
         List<ZipfSong> result = new ArrayList<ZipfSong>(frequencies.length);
         for (int i = 0; i < frequencies.length; i++) {
-            result.add(new ZipfSong(names[i], (frequencies[i] * (i == 0 ? 0.5f : i))));
+            result.add(convert(frequencies[i], names[i], i));
         }
 
         return result;
+    }
+
+    public static ZipfSong convert(long frequency, String name, int position) {
+        double popularity = frequency;
+        return new ZipfSong(name, (popularity * (position + 1)), position + 1);
     }
 
     /**
@@ -54,40 +59,88 @@ public class ZipfSong implements Comparable<ZipfSong> {
         }
     }
 
-    /**
-     * Returns {@code limit} number of songs with the highest quality
-     * @throws java.lang.IllegalArgumentException if data is null
-     */
-    public static String[] getMostPopular(@NotNull List<ZipfSong> data, int limit) {
-        if (data == null) {
-            throw new IllegalArgumentException("Non null list of songs is expected!");
-        } else if (data.size() == 0) {
-            return new String[]{};
-        }
+//    /**
+//     * Returns {@code limit} number of songs with the highest quality
+//     * @throws java.lang.IllegalArgumentException if data is null
+//     */
+//    public static String[] getMostPopular(List<ZipfSong> data, int limit) {
+//        if (data == null) {
+//            throw new IllegalArgumentException("Non null list of songs is expected!");
+//        } else if (data.size() == 0) {
+//            return new String[]{};
+//        }
+//
+//        if (limit < 0 || limit > data.size()) {
+//            limit = data.size();
+//        }
+//
+//        Collections.sort(data);
+//
+//        data = data.subList(0, limit);
+//        return getNames(data);
+//    }
 
-        if (limit < 0 || limit > data.size()) {
-            limit = data.size();
-        }
-
-        Collections.sort(data);
-
-        data = data.subList(0, limit);
-        return getNames(data);
-    }
-
-    public int compareTo(@NotNull ZipfSong o) {
+    public int compareTo(ZipfSong o) {
         if (o == null) {
             return -1;
         } else {
-            return popularity == o.popularity ? 0 : popularity < o.popularity ? 1 : -1;
+            return popularity < o.popularity ? 1 : popularity > o.popularity ? -1 :
+                    index > o.index ? 1 : index > o.index ? -1 : 0;
         }
     }
 
-    public boolean equals(@NotNull Object o) {
+    public boolean equals(Object o) {
         if (o != null && o instanceof ZipfSong) {
             return ((ZipfSong)o).name.equals(name);
         }
 
         return false;
+    }
+
+    public static void setSorter(SortingStrategy sorter) {
+        ZipfSong.sorter = sorter;
+    }
+
+    public static void main(String...args) {
+        Scanner in = new Scanner(System.in);
+
+        int n = in.nextInt(); // the number of songs in the album
+        int m = in.nextInt(); // the number of songs to be returned
+
+        assert(n <= 50000 && n >= 1);
+        assert(m <= n && m >= 1);
+
+        ZipfSong[] songs = new ZipfSong[n];
+        for (int i = 0; i < n; i++) {
+            songs[i] = (convert(in.nextLong(), in.next(), i));
+        }
+
+        String[] result = getMostPopular(songs, m);
+        StringBuilder sb = new StringBuilder();
+        for (String song : result) {
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            sb.append(song);
+        }
+
+        System.out.println(sb.toString());
+    }
+
+    public static String[] getMostPopular(ZipfSong[] songs, int limit) {
+        sorter.sort(songs);
+        //System.out.println(Arrays.asList(a));
+
+        String[] result = new String[limit];
+        for (int i = 0; i < limit; i++) {
+            result[i] = songs[i].name;
+        }
+//        System.out.println(Arrays.asList(result));
+
+        return result;
+    }
+
+    public String toString() {
+        return name + ":" + popularity;
     }
 }
